@@ -31,6 +31,17 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.vk.api</groupId>
+			<artifactId>sdk</artifactId>
+			<version>1.0.7</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.yvasyliev</groupId>
+			<artifactId>java-vk-bots-longpoll-api</artifactId>
+			<version>1.5.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

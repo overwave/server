@@ -26,6 +26,8 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
     private static final String HELP_COMMAND = "крок команды";
     private static final String BEGIN_COMMAND = "крок начать";
 
+    private static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
+
     @Value("${groupId}")
     int groupId;
     @Value("${accessToken}")
@@ -37,20 +39,20 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
     public ChatBot() {
         crokoGame = new CrokoGame();
 
-        keyboard = new Keyboard();
+        Button.Action action = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
+        Button button = new Button(Button.ButtonColor.SECONDARY, action);
 
-        Button.CallbackAction callbackAction2 = new Button.CallbackAction("Стать ведущим");
-        callbackAction2.setPayload("{\"action\":\"begin\"}");
-        Button button2 = new Button(callbackAction2);
-        button2.setColor(Button.ButtonColor.SECONDARY);
-
-        this.keyboard.setButtons(List.of(List.of(button2)));
-        this.keyboard.setInline(true);
+        keyboard = new Keyboard()
+                .setButtons(List.of(List.of(button)))
+                .setInline(true);
     }
-
 
     @Override
     public void onMessageEvent(MessageEvent messageEvent) {
+        String action = (String) messageEvent.getPayload().get("action");
+        if ("begin".equals(action)) {
+            crokoGame.becomeLeader(messageEvent.getUserId());
+        }
         try {
             new MessagesSendEventAnswer(accessToken)
                     .setEventId(messageEvent.getEventId())
@@ -68,6 +70,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
     public void onMessageNew(MessageNewEvent messageNewEvent) {
         Message message = messageNewEvent.getMessage();
         try {
+//            message.getAttachments().get(0).getType()
             if (message.hasText()) {
                 String lowerCaseMessage = message.getText().toLowerCase(Locale.ROOT);
                 if (BEGIN_COMMAND.equals(lowerCaseMessage)) {

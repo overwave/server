@@ -7,6 +7,10 @@ public class CrokoGame {
 
     }
 
+    public void becomeLeader(int userId) {
+
+    }
+
     private enum State {
         IDLE,
         IN_GAME

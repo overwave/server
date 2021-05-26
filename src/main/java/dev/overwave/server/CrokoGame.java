@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static dev.overwave.server.ChatBot.BEGIN_ACTION;
 import static dev.overwave.server.ChatBot.NEXT_ACTION;
+import static dev.overwave.server.ChatBot.SKIP_ACTION;
 
 public class CrokoGame {
 
@@ -31,16 +32,18 @@ public class CrokoGame {
         this.wordsBank = new WordsBank();
         this.leaderboard = new Leaderboard();
 
-        Button.Action action = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
-        Button button = new Button(Button.ButtonColor.SECONDARY, action);
+        Button.Action beginAction = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
+        Button beginButton = new Button(Button.ButtonColor.SECONDARY, beginAction);
         beginKeyboard = new Keyboard()
-                .setButtons(List.of(List.of(button)))
+                .setButtons(List.of(List.of(beginButton)))
                 .setInline(true);
 
-        Button.Action action2 = new Button.CallbackAction("Получить слово").setPayload(NEXT_ACTION);
-        Button button2 = new Button(Button.ButtonColor.SECONDARY, action2);
+        Button.Action getWordAction = new Button.CallbackAction("Получить слово").setPayload(NEXT_ACTION);
+        Button getWordButton = new Button(Button.ButtonColor.SECONDARY, getWordAction);
+        Button.Action skipAction = new Button.CallbackAction("Пропустить").setPayload(SKIP_ACTION);
+        Button skipButton = new Button(Button.ButtonColor.SECONDARY, skipAction);
         nextKeyboard = new Keyboard()
-                .setButtons(List.of(List.of(button2)))
+                .setButtons(List.of(List.of(getWordButton), List.of(skipButton)))
                 .setInline(true);
     }
 
@@ -55,6 +58,12 @@ public class CrokoGame {
     }
 
     public void getHelp(MessagingFacade facade) {
+        facade.sendMessage("""
+                Список команд:
+                "крок начать" или "крок игра" - начать игру
+                "крок топ" - таблица лидеров
+                "крок команды" - список команд
+                """);
     }
 
     public void becomeLeader(MessagingFacade facade) {
@@ -62,7 +71,7 @@ public class CrokoGame {
             leaderId = facade.getFrom();
             state = State.STARTING;
             facade.confirmEvent();
-            facade.sendMessage(idToFormattedUser(leaderId, facade) + " загадывает слово.", nextKeyboard);
+            facade.sendMessage(idToFormattedUser(leaderId, facade) + " объясняет слово.", nextKeyboard);
         } else {
             facade.showNotification("Ведущий уже назначен!");
         }
@@ -84,6 +93,24 @@ public class CrokoGame {
         }
     }
 
+    public void skipTurn(MessagingFacade facade) {
+        if (facade.getFrom() != leaderId) {
+            facade.showNotification("Вы не являетесь ведущим!");
+            return;
+        }
+
+        User user = facade.userById(leaderId);
+        state = State.IDLE;
+        word = null;
+        leaderId = 0;
+
+        facade.confirmEvent();
+        facade.sendMessage("%s %s место ведущего.".formatted(
+                idToFormattedUser(facade.getFrom(), facade),
+                getVerb(user, Verb.YIELDED)
+        ), beginKeyboard);
+    }
+
     public void checkAnswer(MessagingFacade facade) {
         if (state == State.IN_GAME && compareWords(facade.getMessage(), word)) {
             int fromId = facade.getFrom();
@@ -94,15 +121,32 @@ public class CrokoGame {
                 leaderboard.incrementUser(facade.getPeerId(), leaderId);
 
                 User user = facade.userById(leaderId);
-                String ending = switch (user.getSex()) {
-                    case MALE -> "угадал";
-                    case FEMALE -> "угадала";
-                    default -> "угадало";
-                };
 
-                facade.sendMessage("%s %s: %s.".formatted(userToFormattedUser(user), ending, word), nextKeyboard);
+                facade.sendMessage("%s %s: %s.".formatted(
+                        userToFormattedUser(user),
+                        getVerb(user, Verb.DECIDED),
+                        word
+                ), nextKeyboard);
                 word = null;
             }
+        }
+    }
+
+    private String getVerb(User user, Verb verb) {
+        if (verb == Verb.DECIDED) {
+            return switch (user.getSex()) {
+                case MALE -> "угадал";
+                case FEMALE -> "угадала";
+                default -> "угадало";
+            };
+        } else if (verb == Verb.YIELDED) {
+            return switch (user.getSex()) {
+                case MALE -> "уступил";
+                case FEMALE -> "уступила";
+                default -> "уступило";
+            };
+        } else {
+            return null;
         }
     }
 
@@ -143,6 +187,11 @@ public class CrokoGame {
         }
 
         facade.sendMessage(builder.toString());
+    }
+
+    private enum Verb {
+        DECIDED,
+        YIELDED,
     }
 
     private enum State {

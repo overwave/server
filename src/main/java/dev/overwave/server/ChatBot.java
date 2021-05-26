@@ -35,6 +35,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
 
     public static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
     public static final String NEXT_ACTION = "{\"action\":\"next\"}";
+    public static final String SKIP_ACTION = "{\"action\":\"skip\"}";
 
     @Value("${groupId}")
     int groupId;
@@ -70,7 +71,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
 
     @PostConstruct
     public void postConstruct() {
-         groupActor = new GroupActor(groupId, accessToken);
+        groupActor = new GroupActor(groupId, accessToken);
 
         facadeFactory = new MessagingFacade.MessagingFacadeBuilder(accessToken, this::getUserById);
     }
@@ -82,6 +83,8 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
             crokoGame.becomeLeader(facadeFactory.of(messageEvent));
         } else if ("next".equals(action)) {
             crokoGame.getWord(facadeFactory.of(messageEvent));
+        } else if ("skip".equals(action)) {
+            crokoGame.skipTurn(facadeFactory.of(messageEvent));
         }
     }
 

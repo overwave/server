@@ -43,7 +43,7 @@ public class CrokoGame {
 
         Button.Action getWordAction = new Button.CallbackAction("Получить слово").setPayload(NEXT_ACTION);
         Button getWordButton = new Button(Button.ButtonColor.SECONDARY, getWordAction);
-        Button.Action skipAction = new Button.CallbackAction("Пропустить").setPayload(SKIP_ACTION);
+        Button.Action skipAction = new Button.CallbackAction("Пропустить ход").setPayload(SKIP_ACTION);
         Button skipButton = new Button(Button.ButtonColor.SECONDARY, skipAction);
         nextKeyboard = new Keyboard()
                 .setButtons(List.of(List.of(getWordButton), List.of(skipButton)))
@@ -76,7 +76,8 @@ public class CrokoGame {
             facade.confirmEvent();
             facade.sendMessage(idToFormattedUser(leaderId, facade) + " объясняет слово.", nextKeyboard);
         } else {
-            facade.showNotification("Ведущий уже назначен!");
+            String name = facade.userById(leaderId).getFirstName();
+            facade.showNotification(name + " сейчас ведущий");
         }
     }
 

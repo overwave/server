@@ -179,7 +179,7 @@ public class CrokoGame {
         builder.append("Топ игроков:\n");
 
         List<Map.Entry<Integer, Integer>> sortedLeaderboard = board.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Integer>comparingByKey().reversed())
+                .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
                 .limit(9)
                 .collect(Collectors.toList());
 

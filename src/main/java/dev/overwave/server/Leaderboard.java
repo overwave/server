@@ -12,7 +12,13 @@ import java.util.Map;
 public class Leaderboard {
     private static final String PATH = "leaderboard/leaderboard-";
 
-    public Map<Integer, Integer> getBoard(int chatId) {
+    private final int chatId;
+
+    public Leaderboard(int chatId) {
+        this.chatId = chatId;
+    }
+
+    public Map<Integer, Integer> getBoard() {
         Map<Integer, Integer> result = new ManagedMap<>();
 
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(PATH + chatId + ".txt"))) {
@@ -27,8 +33,8 @@ public class Leaderboard {
         return result;
     }
 
-    public void incrementUser(int chatId, int userId) {
-        Map<Integer, Integer> board = getBoard(chatId);
+    public void incrementUser(int userId) {
+        Map<Integer, Integer> board = getBoard();
         int newValue = board.getOrDefault(userId, 0) + 1;
         board.put(userId, newValue);
 

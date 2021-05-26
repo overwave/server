@@ -32,7 +32,6 @@ public class CrokoGame {
         this.word = null;
         this.wordsBank = new WordsBank();
         this.leaderboard = new Leaderboard();
-        this.hellos = new Hellos();
         this.state = State.IDLE;
 
         Button.Action beginAction = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);

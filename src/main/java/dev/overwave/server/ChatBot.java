@@ -32,10 +32,12 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
     private static final String BEGIN_COMMAND = "крок начать";
     private static final String PLAY_COMMAND = "крок игра";
     private static final String LEADERBOARD_COMMAND = "крок топ";
+    private static final String LEADER_COMMAND = "крок ведущий";
 
     public static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
     public static final String NEXT_ACTION = "{\"action\":\"next\"}";
     public static final String SKIP_ACTION = "{\"action\":\"skip\"}";
+    public static final String PEEK_ACTION = "{\"action\":\"peek\"}";
 
     @Value("${groupId}")
     int groupId;
@@ -99,6 +101,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
                 case BEGIN_COMMAND, PLAY_COMMAND -> crokoGame.begin(facadeFactory.of(messageNewEvent));
                 case HELP_COMMAND -> crokoGame.getHelp(facadeFactory.of(messageNewEvent));
                 case LEADERBOARD_COMMAND -> crokoGame.showLeaderboard(facadeFactory.of(messageNewEvent));
+                case LEADER_COMMAND -> crokoGame.showLeaderMenu(facadeFactory.of(messageNewEvent));
             }
         }
     }

@@ -5,6 +5,7 @@ import api.longpoll.bots.model.objects.additional.Button;
 import api.longpoll.bots.model.objects.additional.Keyboard;
 import com.vk.api.sdk.objects.users.User;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -12,27 +13,20 @@ import java.util.stream.Collectors;
 
 import static dev.overwave.server.ChatBot.BEGIN_ACTION;
 import static dev.overwave.server.ChatBot.NEXT_ACTION;
+import static dev.overwave.server.ChatBot.PEEK_ACTION;
 import static dev.overwave.server.ChatBot.SKIP_ACTION;
 
 public class CrokoGame {
 
     private final WordsBank wordsBank;
-    private final Leaderboard leaderboard;
-    private final Hellos hellos;
-
-    private int leaderId;
-    private State state;
-    private String word;
+    private final Map<Integer, Chat> chats;
 
     Keyboard beginKeyboard;
     Keyboard nextKeyboard;
+    Keyboard leaderKeyboard;
 
     public CrokoGame() {
-        this.leaderId = 0;
-        this.word = null;
         this.wordsBank = new WordsBank();
-        this.leaderboard = new Leaderboard();
-        this.state = State.IDLE;
 
         Button.Action beginAction = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
         Button beginButton = new Button(Button.ButtonColor.SECONDARY, beginAction);
@@ -47,6 +41,17 @@ public class CrokoGame {
         nextKeyboard = new Keyboard()
                 .setButtons(List.of(List.of(getWordButton), List.of(skipButton)))
                 .setInline(true);
+
+        Button.Action getNewWordAction = new Button.CallbackAction("Получить новое слово").setPayload(NEXT_ACTION);
+        Button getNewWordButton = new Button(Button.ButtonColor.SECONDARY, getNewWordAction);
+        Button.Action peekWordAction = new Button.CallbackAction("Показать слово").setPayload(PEEK_ACTION);
+        Button peekWordButton = new Button(Button.ButtonColor.SECONDARY, peekWordAction);
+
+        leaderKeyboard = new Keyboard()
+                .setButtons(List.of(List.of(getNewWordButton), List.of(peekWordButton), List.of(skipButton)))
+                .setInline(true);
+
+        chats = new HashMap<>();
     }
 
 //    "failed":2 — истекло время действия ключа, нужно заново получить key методом groups.getLongPollServer.
@@ -65,47 +70,58 @@ public class CrokoGame {
                 "крок начать" или "крок игра" - начать игру
                 "крок топ" - таблица лидеров
                 "крок команды" - список команд
+                "крок ведущий" - меню ведущего
                 """);
     }
 
     public void becomeLeader(MessagingFacade facade) {
-        if (state == State.IDLE) {
-            leaderId = facade.getFrom();
-            state = State.STARTING;
+        Chat chat = getChat(facade.getPeerId());
+
+        if (chat.getState() == State.IDLE) {
+            chat.setLeaderId(facade.getFrom());
+            chat.setState(State.STARTING);
             facade.confirmEvent();
-            facade.sendMessage(idToFormattedUser(leaderId, facade) + " объясняет слово.", nextKeyboard);
+            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " объясняет слово.", nextKeyboard);
         } else {
-            String name = facade.userById(leaderId).getFirstName();
+            String name = facade.userById(chat.getLeaderId()).getFirstName();
             facade.showNotification(name + " сейчас ведущий");
         }
     }
 
+    private Chat getChat(int chatId) {
+        return chats.computeIfAbsent(chatId, Chat::new);
+    }
+
     public void getWord(MessagingFacade facade) {
-        if (facade.getFrom() != leaderId) {
+        Chat chat = getChat(facade.getPeerId());
+
+        if (facade.getFrom() != chat.getLeaderId()) {
             facade.showNotification("Вы не являетесь ведущим!");
             return;
         }
 
-        if (state == State.STARTING || state == State.IN_GAME) {
-            state = State.IN_GAME;
+        if (chat.getState() == State.STARTING || chat.getState() == State.IN_GAME) {
+            chat.setState(State.IN_GAME);
 
-            word = wordsBank.getWord();
-            facade.showNotification("Объясни слово: " + word);
+            chat.setWord(wordsBank.getWord());
+            facade.showNotification("Объясни слово: " + chat.getWord());
         } else {
             facade.showNotification("Ведущий ещё не выбран!");
         }
     }
 
     public void skipTurn(MessagingFacade facade) {
-        if (facade.getFrom() != leaderId) {
+        Chat chat = getChat(facade.getPeerId());
+
+        if (facade.getFrom() != chat.getLeaderId()) {
             facade.showNotification("Вы не являетесь ведущим!");
             return;
         }
 
-        User user = facade.userById(leaderId);
-        state = State.IDLE;
-        word = null;
-        leaderId = 0;
+        User user = facade.userById(chat.getLeaderId());
+        chat.setState(State.IDLE);
+        chat.setWord(null);
+        chat.setLeaderId(0);
 
         facade.confirmEvent();
         facade.sendMessage("%s %s место ведущего.".formatted(
@@ -115,26 +131,24 @@ public class CrokoGame {
     }
 
     public void checkAnswer(MessagingFacade facade) {
-        if (!hellos.hello(facade.getPeerId())) {
-            getHelp(facade);
-        }
+        Chat chat = getChat(facade.getPeerId());
 
-        if (state == State.IN_GAME && compareWords(facade.getMessage(), word)) {
+        if (chat.getState() == State.IN_GAME && compareWords(facade.getMessage(), chat.getWord())) {
             int fromId = facade.getFrom();
 
-            if (fromId != leaderId) {
-                leaderId = fromId;
-                state = State.STARTING;
-                leaderboard.incrementUser(facade.getPeerId(), leaderId);
+            if (fromId != chat.getLeaderId()) {
+                chat.setLeaderId(fromId);
+                chat.setState(State.STARTING);
+                chat.incrementLeader();
 
-                User user = facade.userById(leaderId);
+                User user = facade.userById(chat.getLeaderId());
 
                 facade.sendMessage("%s %s: %s.".formatted(
                         userToFormattedUser(user),
                         getVerb(user, Verb.DECIDED),
-                        word
+                        chat.getWord()
                 ), nextKeyboard);
-                word = null;
+                chat.setWord(null);
             }
         }
     }
@@ -169,7 +183,9 @@ public class CrokoGame {
     }
 
     public void showLeaderboard(MessagingFacade facade) {
-        Map<Integer, Integer> board = leaderboard.getBoard(facade.getPeerId());
+        Chat chat = getChat(facade.getPeerId());
+
+        Map<Integer, Integer> board = chat.getLeaderboard();
         if (board.isEmpty()) {
             facade.sendMessage("Топ пока пуст.");
             return;
@@ -196,19 +212,32 @@ public class CrokoGame {
         facade.sendMessage(builder.toString());
     }
 
+    public void showLeaderMenu(MessagingFacade facade) {
+        Chat chat = getChat(facade.getPeerId());
+
+        if (chat.getState() == State.IDLE) {
+            facade.sendMessage("Ведущий ещё не назначен", beginKeyboard);
+        } else if (chat.getState() == State.STARTING) {
+            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.", beginKeyboard);
+        } else if (chat.getState() == State.IN_GAME) {
+            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий.", leaderKeyboard);
+        }
+
+    }
+
     private enum Verb {
         DECIDED,
         YIELDED,
     }
 
-    private enum State {
+    public enum State {
         IDLE,
         STARTING,
         IN_GAME
     }
 
     public void begin(MessagingFacade facade) {
-        state = State.IDLE;
+        getChat(facade.getPeerId()).setState(State.IDLE);
         facade.sendMessage("Игра запущена", beginKeyboard);
     }
 }

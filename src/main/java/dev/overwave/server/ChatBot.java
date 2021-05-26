@@ -30,6 +30,8 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
 
     private static final String HELP_COMMAND = "крок команды";
     private static final String BEGIN_COMMAND = "крок начать";
+    private static final String PLAY_COMMAND = "крок игра";
+    private static final String LEADERBOARD_COMMAND = "крок топ";
 
     public static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
     public static final String NEXT_ACTION = "{\"action\":\"next\"}";
@@ -90,10 +92,10 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
         Message message = messageNewEvent.getMessage();
         if (message.hasText()) {
             String lowerCaseMessage = message.getText().toLowerCase(Locale.ROOT);
-            if (BEGIN_COMMAND.equals(lowerCaseMessage)) {
-                crokoGame.begin(facadeFactory.of(messageNewEvent));
-            } else if (HELP_COMMAND.equals(lowerCaseMessage)) {
-                crokoGame.getHelp(facadeFactory.of(messageNewEvent));
+            switch (lowerCaseMessage) {
+                case BEGIN_COMMAND, PLAY_COMMAND -> crokoGame.begin(facadeFactory.of(messageNewEvent));
+                case HELP_COMMAND -> crokoGame.getHelp(facadeFactory.of(messageNewEvent));
+                case LEADERBOARD_COMMAND -> crokoGame.showLeaderboard(facadeFactory.of(messageNewEvent));
             }
         }
     }

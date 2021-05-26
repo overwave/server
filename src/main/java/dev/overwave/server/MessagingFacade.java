@@ -102,7 +102,7 @@ public class MessagingFacade {
         }
     }
 
-    private int getPeerId() {
+    public int getPeerId() {
         if (messageNewEvent != null) {
             return messageNewEvent.getMessage().getPeerId();
         }

@@ -6,6 +6,9 @@ import api.longpoll.bots.model.objects.additional.Keyboard;
 import com.vk.api.sdk.objects.users.User;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static dev.overwave.server.ChatBot.BEGIN_ACTION;
 import static dev.overwave.server.ChatBot.NEXT_ACTION;
@@ -13,6 +16,7 @@ import static dev.overwave.server.ChatBot.NEXT_ACTION;
 public class CrokoGame {
 
     private final WordsBank wordsBank;
+    private final Leaderboard leaderboard;
 
     private int leaderId;
     private State state;
@@ -25,6 +29,7 @@ public class CrokoGame {
         this.leaderId = 0;
         this.word = null;
         this.wordsBank = new WordsBank();
+        this.leaderboard = new Leaderboard();
 
         Button.Action action = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
         Button button = new Button(Button.ButtonColor.SECONDARY, action);
@@ -80,12 +85,13 @@ public class CrokoGame {
     }
 
     public void checkAnswer(MessagingFacade facade) {
-        if (state == State.IN_GAME && word.equalsIgnoreCase(facade.getMessage())) {
+        if (state == State.IN_GAME && compareWords(facade.getMessage(), word)) {
             int fromId = facade.getFrom();
 
             if (fromId != leaderId) {
                 leaderId = fromId;
-                word = null;
+                state = State.STARTING;
+                leaderboard.incrementUser(facade.getPeerId(), leaderId);
 
                 User user = facade.userById(leaderId);
                 String ending = switch (user.getSex()) {
@@ -95,8 +101,48 @@ public class CrokoGame {
                 };
 
                 facade.sendMessage("%s %s: %s.".formatted(userToFormattedUser(user), ending, word), nextKeyboard);
+                word = null;
             }
         }
+    }
+
+    private boolean compareWords(String guess, String word) {
+        if (guess == null || word == null) {
+            return false;
+        }
+
+        guess = guess.toLowerCase(Locale.ROOT).replace('ё', 'е');
+        word = word.toLowerCase(Locale.ROOT).replace('ё', 'е');
+
+        return guess.equals(word);
+    }
+
+    public void showLeaderboard(MessagingFacade facade) {
+        Map<Integer, Integer> board = leaderboard.getBoard(facade.getPeerId());
+        if (board.isEmpty()) {
+            facade.sendMessage("Топ пока пуст.");
+            return;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Топ игроков:\n");
+
+        List<Map.Entry<Integer, Integer>> sortedLeaderboard = board.entrySet().stream()
+                .sorted(Map.Entry.<Integer, Integer>comparingByKey().reversed())
+                .limit(9)
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < sortedLeaderboard.size(); i++) {
+            Map.Entry<Integer, Integer> entry = sortedLeaderboard.get(i);
+            builder.append(i + 1)
+                    .append(". ")
+                    .append(idToFormattedUser(entry.getKey(), facade))
+                    .append(" - ")
+                    .append(entry.getValue())
+                    .append("\n");
+        }
+
+        facade.sendMessage(builder.toString());
     }
 
     private enum State {

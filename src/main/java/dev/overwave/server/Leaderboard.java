@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class Leaderboard {
-    private static final String PATH = "-2000000002-leaderboard.txt";
+    private static final String PATH = "-leaderboard.txt";
 
     public Map<Integer, Integer> getBoard(int chatId) {
         Map<Integer, Integer> result = new ManagedMap<>();

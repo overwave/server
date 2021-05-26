@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.util.Map;
 
 public class Leaderboard {
-    private static final String PATH = "-leaderboard.txt";
+    private static final String PATH = "leaderboard/leaderboard-";
 
     public Map<Integer, Integer> getBoard(int chatId) {
         Map<Integer, Integer> result = new ManagedMap<>();
 
-        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(chatId + PATH))) {
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(PATH + chatId + ".txt"))) {
             String leaderboard = new String(inputStream.readAllBytes());
             for (String row : leaderboard.split("\r\n")) {
                 String[] tokens = row.split(" ");
@@ -32,7 +32,7 @@ public class Leaderboard {
         int newValue = board.getOrDefault(userId, 0) + 1;
         board.put(userId, newValue);
 
-        try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(chatId + PATH))) {
+        try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(PATH + chatId + ".txt"))) {
             for (Map.Entry<Integer, Integer> entry : board.entrySet()) {
                 String line = entry.getKey() + " " + entry.getValue() + "\r\n";
                 outputStream.write(line.getBytes());

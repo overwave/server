@@ -18,6 +18,7 @@ public class CrokoGame {
 
     private final WordsBank wordsBank;
     private final Leaderboard leaderboard;
+    private final Hellos hellos;
 
     private int leaderId;
     private State state;
@@ -31,6 +32,8 @@ public class CrokoGame {
         this.word = null;
         this.wordsBank = new WordsBank();
         this.leaderboard = new Leaderboard();
+        this.hellos = new Hellos();
+        this.state = State.IDLE;
 
         Button.Action beginAction = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
         Button beginButton = new Button(Button.ButtonColor.SECONDARY, beginAction);
@@ -67,7 +70,7 @@ public class CrokoGame {
     }
 
     public void becomeLeader(MessagingFacade facade) {
-        if (state == State.IDLE || state == null) {
+        if (state == State.IDLE) {
             leaderId = facade.getFrom();
             state = State.STARTING;
             facade.confirmEvent();
@@ -89,7 +92,7 @@ public class CrokoGame {
             word = wordsBank.getWord();
             facade.showNotification("Объясни слово: " + word);
         } else {
-            facade.showNotification("Игра ещё не начата!");
+            facade.showNotification("Ведущий ещё не выбран!");
         }
     }
 
@@ -112,6 +115,10 @@ public class CrokoGame {
     }
 
     public void checkAnswer(MessagingFacade facade) {
+        if (!hellos.hello(facade.getPeerId())) {
+            getHelp(facade);
+        }
+
         if (state == State.IN_GAME && compareWords(facade.getMessage(), word)) {
             int fromId = facade.getFrom();
 

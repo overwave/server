@@ -87,6 +87,8 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
             crokoGame.getWord(facadeFactory.of(messageEvent));
         } else if ("skip".equals(action)) {
             crokoGame.skipTurn(facadeFactory.of(messageEvent));
+        } else if ("peek".equals(action)) {
+            crokoGame.peekWord(facadeFactory.of(messageEvent));
         }
     }
 

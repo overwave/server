@@ -83,8 +83,12 @@ public class CrokoGame {
             facade.confirmEvent();
             facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " объясняет слово.", nextKeyboard);
         } else {
-            String name = facade.userById(chat.getLeaderId()).getFirstName();
-            facade.showNotification(name + " сейчас ведущий");
+            if (facade.getFrom() == chat.getLeaderId()) {
+                facade.showNotification("Вы уже ведущий");
+            } else {
+                String name = facade.userById(chat.getLeaderId()).getFirstName();
+                facade.showNotification(name + " сейчас ведущий");
+            }
         }
     }
 
@@ -220,9 +224,27 @@ public class CrokoGame {
         } else if (chat.getState() == State.STARTING) {
             facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.", beginKeyboard);
         } else if (chat.getState() == State.IN_GAME) {
-            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий.", leaderKeyboard);
+            if (facade.getFrom() == chat.getLeaderId()) {
+                facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " сейчас ведущий.", leaderKeyboard);
+            }
         }
+    }
 
+    public void peekWord(MessagingFacade facade) {
+        Chat chat = getChat(facade.getPeerId());
+
+        if (chat.getState() == State.IDLE) {
+            facade.showNotification("Ведущий ещё не назначен");
+        } else if (chat.getState() == State.STARTING) {
+            facade.showNotification(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.");
+        } else if (chat.getState() == State.IN_GAME) {
+            if (facade.getFrom() == chat.getLeaderId()) {
+                facade.showNotification("Загаданное слово: " + chat.getWord());
+            } else {
+                String name = facade.userById(chat.getLeaderId()).getFirstName();
+                facade.showNotification(name + " сейчас ведущий");
+            }
+        }
     }
 
     private enum Verb {

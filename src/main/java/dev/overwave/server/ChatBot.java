@@ -29,10 +29,13 @@ import java.util.Locale;
 public class ChatBot extends LongPollBot implements ApplicationRunner {
 
     private static final String HELP_COMMAND = "крок команды";
+    private static final String HELP_COMMAND_2 = "крок ком";
     private static final String BEGIN_COMMAND = "крок начать";
     private static final String PLAY_COMMAND = "крок игра";
+    private static final String PLAY_COMMAND_2 = "крок играть";
     private static final String LEADERBOARD_COMMAND = "крок топ";
     private static final String LEADER_COMMAND = "крок ведущий";
+    private static final String LEADER_COMMAND_2 = "крок вед";
     private static final String TEST_COMMAND = "крок тест";
 
     public static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
@@ -101,10 +104,10 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
         if (message.hasText()) {
             String lowerCaseMessage = message.getText().toLowerCase(Locale.ROOT);
             switch (lowerCaseMessage) {
-                case BEGIN_COMMAND, PLAY_COMMAND -> crokoGame.begin(facadeFactory.of(messageNewEvent));
-                case HELP_COMMAND -> crokoGame.getHelp(facadeFactory.of(messageNewEvent));
+                case BEGIN_COMMAND, PLAY_COMMAND, PLAY_COMMAND_2 -> crokoGame.begin(facadeFactory.of(messageNewEvent));
+                case HELP_COMMAND, HELP_COMMAND_2 -> crokoGame.getHelp(facadeFactory.of(messageNewEvent));
                 case LEADERBOARD_COMMAND -> crokoGame.showLeaderboard(facadeFactory.of(messageNewEvent));
-                case LEADER_COMMAND -> crokoGame.showLeaderMenu(facadeFactory.of(messageNewEvent));
+                case LEADER_COMMAND, LEADER_COMMAND_2 -> crokoGame.showLeaderMenu(facadeFactory.of(messageNewEvent));
                 case TEST_COMMAND -> crokoGame.test(facadeFactory.of(messageNewEvent));
             }
         }

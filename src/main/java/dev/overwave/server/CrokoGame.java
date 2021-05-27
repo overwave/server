@@ -18,7 +18,7 @@ import static dev.overwave.server.ChatBot.SKIP_ACTION;
 
 public class CrokoGame {
 
-    private final static List<Integer> stickers = List.of(19446, 6353, 50468, 50875, 19221, 17679, 11502, 15591, 3545);
+    private final static List<Integer> stickers = List.of(19446, 6353, 50468, 50875, 19221, 11502, 15591, 3545);
 
     private final WordsBank wordsBank;
     private final Map<Integer, Chat> chats;

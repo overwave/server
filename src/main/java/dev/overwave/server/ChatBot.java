@@ -105,7 +105,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
                 case HELP_COMMAND -> crokoGame.getHelp(facadeFactory.of(messageNewEvent));
                 case LEADERBOARD_COMMAND -> crokoGame.showLeaderboard(facadeFactory.of(messageNewEvent));
                 case LEADER_COMMAND -> crokoGame.showLeaderMenu(facadeFactory.of(messageNewEvent));
-//                case TEST_COMMAND -> crokoGame.test(facadeFactory.of(messageNewEvent));
+                case TEST_COMMAND -> crokoGame.test(facadeFactory.of(messageNewEvent));
             }
         }
     }

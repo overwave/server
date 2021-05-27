@@ -18,7 +18,7 @@ import static dev.overwave.server.ChatBot.SKIP_ACTION;
 
 public class CrokoGame {
 
-    private static final int YES_STICKER_ID = 19446;
+    private final static List<Integer> stickers = List.of(19446, 6353, 50468, 50875, 19221, 17679, 11502, 15591, 3545);
 
     private final WordsBank wordsBank;
     private final Map<Integer, Chat> chats;
@@ -162,7 +162,7 @@ public class CrokoGame {
 
                 User user = facade.userById(chat.getLeaderId());
 
-                facade.sendSticker(YES_STICKER_ID);
+                facade.sendSticker(Util.getRandom(stickers));
                 facade.sendMessage("%s %s: %s.".formatted(
                         userToFormattedUser(user),
                         getLocalization(user, Verb.WAS_CORRECT),
@@ -277,6 +277,7 @@ public class CrokoGame {
     }
 
     public void test(MessagingFacade facade) {
+//        stickers.forEach(facade::sendSticker);
     }
 
     private enum Verb {

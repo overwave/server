@@ -5,14 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class WordsBank {
-    private final Random random;
     private final List<String> words;
 
     public WordsBank() {
-        random = new Random();
         words = readWords("words_list.txt");
     }
 
@@ -27,6 +24,6 @@ public class WordsBank {
     }
 
     public String getWord() {
-        return words.get(random.nextInt(words.size()));
+        return Util.getRandom(words);
     }
 }

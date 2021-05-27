@@ -1,12 +1,11 @@
 package dev.overwave.server;
 
-import org.springframework.beans.factory.support.ManagedMap;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Leaderboard {
@@ -19,7 +18,7 @@ public class Leaderboard {
     }
 
     public Map<Integer, Integer> getBoard() {
-        Map<Integer, Integer> result = new ManagedMap<>();
+        Map<Integer, Integer> result = new HashMap<>();
 
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(PATH + chatId + ".txt"))) {
             String leaderboard = new String(inputStream.readAllBytes());

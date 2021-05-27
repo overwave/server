@@ -1,8 +1,17 @@
 package dev.overwave.server;
 
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
 
 public class Chat {
+    private static final String PATH = "state/state-";
+
     private final int id;
     private final Leaderboard leaderboard;
     private final Structure<String> recentWords;
@@ -14,11 +23,43 @@ public class Chat {
     public Chat(int id) {
         this.id = id;
 
+        this.leaderboard = new Leaderboard(id);
+        this.recentWords = new Structure<>();
+
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(PATH + id + ".txt"))) {
+            String content = new String(inputStream.readAllBytes());
+            String[] lines = content.split("\r\n");
+
+            this.leaderId = Integer.parseInt(lines[0]);
+            this.word = lines[1].equals("") ? null : lines[1];
+            this.state = CrokoGame.State.valueOf(lines[2]);
+
+            for (int i = 3; i < lines.length; i++) {
+                recentWords.add(lines[i]);
+            }
+            return;
+        } catch (FileNotFoundException ignored) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         this.leaderId = 0;
         this.word = null;
-        this.leaderboard = new Leaderboard(id);
         this.state = CrokoGame.State.IDLE;
-        this.recentWords = new Structure<>();
+    }
+
+    private void saveState() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(leaderId).append("\n");
+        builder.append(word == null ? "" : word).append("\n");
+        builder.append(state).append("\n");
+        builder.append(recentWords);
+
+        try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(PATH + id + ".txt"))) {
+            outputStream.write(builder.toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Map<Integer, Integer> getLeaderboard() {
@@ -31,6 +72,7 @@ public class Chat {
 
     public void setLeaderId(int leaderId) {
         this.leaderId = leaderId;
+        saveState();
     }
 
     public String getWord() {
@@ -39,6 +81,7 @@ public class Chat {
 
     public void setWord(String word) {
         this.word = word;
+        saveState();
     }
 
     public CrokoGame.State getState() {
@@ -47,6 +90,7 @@ public class Chat {
 
     public void setState(CrokoGame.State state) {
         this.state = state;
+        saveState();
     }
 
     public void incrementLeader() {
@@ -55,6 +99,7 @@ public class Chat {
 
     public void rememberWord() {
         recentWords.add(word);
+        saveState();
     }
 
     public boolean wasRecently(String word) {

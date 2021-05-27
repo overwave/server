@@ -240,9 +240,7 @@ public class CrokoGame {
         } else if (chat.getState() == State.STARTING) {
             facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.", beginKeyboard);
         } else if (chat.getState() == State.IN_GAME) {
-            if (facade.getFrom() == chat.getLeaderId()) {
-                facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " сейчас ведущий.", leaderKeyboard);
-            }
+            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " сейчас ведущий.", leaderKeyboard);
         }
     }
 

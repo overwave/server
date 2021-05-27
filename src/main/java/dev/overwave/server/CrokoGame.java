@@ -86,8 +86,9 @@ public class CrokoGame {
             if (facade.getFrom() == chat.getLeaderId()) {
                 facade.showNotification("Вы уже ведущий");
             } else {
-                String name = facade.userById(chat.getLeaderId()).getFirstName();
-                facade.showNotification(name + " сейчас ведущий");
+                User user = facade.userById(chat.getLeaderId());
+                String name = user.getFirstName();
+                facade.showNotification(name + " сейчас " + getVerb(user, Verb.YIELDED));
             }
         }
     }
@@ -176,6 +177,12 @@ public class CrokoGame {
                 case FEMALE -> "уступила";
                 default -> "уступило";
             };
+        } else if (verb == Verb.LEADER) {
+            return switch (user.getSex()) {
+                case MALE -> "ведущий";
+                case FEMALE -> "ведущая";
+                default -> "ведущее";
+            };
         } else {
             return null;
         }
@@ -256,6 +263,7 @@ public class CrokoGame {
     private enum Verb {
         DECIDED,
         YIELDED,
+        LEADER,
     }
 
     public enum State {

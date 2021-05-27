@@ -5,6 +5,7 @@ import java.util.Map;
 public class Chat {
     private final int id;
     private final Leaderboard leaderboard;
+    private final Structure<String> recentWords;
 
     private int leaderId;
     private CrokoGame.State state;
@@ -17,6 +18,7 @@ public class Chat {
         this.word = null;
         this.leaderboard = new Leaderboard(id);
         this.state = CrokoGame.State.IDLE;
+        this.recentWords = new Structure<>();
     }
 
     public Map<Integer, Integer> getLeaderboard() {
@@ -49,5 +51,13 @@ public class Chat {
 
     public void incrementLeader() {
         leaderboard.incrementUser(leaderId);
+    }
+
+    public void rememberWord() {
+        recentWords.add(word);
+    }
+
+    public boolean wasRecently(String word) {
+        return !recentWords.contains(word);
     }
 }

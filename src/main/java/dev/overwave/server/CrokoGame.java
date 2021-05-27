@@ -107,7 +107,12 @@ public class CrokoGame {
         if (chat.getState() == State.STARTING || chat.getState() == State.IN_GAME) {
             chat.setState(State.IN_GAME);
 
-            chat.setWord(wordsBank.getWord());
+            String word;
+            do {
+                word = wordsBank.getWord();
+            } while (!chat.wasRecently(word));
+            chat.setWord(word);
+
             facade.showNotification("Объясни слово: " + chat.getWord());
         } else {
             facade.showNotification("Ведущий ещё не выбран!");
@@ -144,6 +149,7 @@ public class CrokoGame {
                 chat.setLeaderId(fromId);
                 chat.setState(State.STARTING);
                 chat.incrementLeader();
+                chat.rememberWord();
 
                 User user = facade.userById(chat.getLeaderId());
 

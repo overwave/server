@@ -58,6 +58,10 @@ public class CrokoGame {
 
 //    "failed":2 — истекло время действия ключа, нужно заново получить key методом groups.getLongPollServer.
 
+    private String idToShortUser(int id, MessagingFacade facade) {
+        return facade.userById(id).getFirstName();
+    }
+
     private String idToFormattedUser(int id, MessagingFacade facade) {
         return userToFormattedUser(facade.userById(id));
     }
@@ -86,11 +90,12 @@ public class CrokoGame {
             facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " объясняет слово.", nextKeyboard);
         } else {
             if (facade.getFrom() == chat.getLeaderId()) {
-                facade.showNotification("Вы уже ведущий");
+                User user = facade.userById(facade.getFrom());
+                facade.showNotification("Вы уже " + getLocalization(user, Verb.LEADER));
             } else {
                 User user = facade.userById(chat.getLeaderId());
                 String name = user.getFirstName();
-                facade.showNotification(name + " сейчас " + getVerb(user, Verb.YIELDED));
+                facade.showNotification(name + " сейчас " + getLocalization(user, Verb.LEADER));
             }
         }
     }
@@ -103,7 +108,8 @@ public class CrokoGame {
         Chat chat = getChat(facade.getPeerId());
 
         if (facade.getFrom() != chat.getLeaderId()) {
-            facade.showNotification("Вы не являетесь ведущим!");
+            User user = facade.userById(chat.getLeaderId());
+            facade.showNotification(idToShortUser(chat.getLeaderId(), facade) + " сейчас " + getLocalization(user, Verb.LEADER));
             return;
         }
 
@@ -125,12 +131,12 @@ public class CrokoGame {
     public void skipTurn(MessagingFacade facade) {
         Chat chat = getChat(facade.getPeerId());
 
+        User user = facade.userById(chat.getLeaderId());
         if (facade.getFrom() != chat.getLeaderId()) {
-            facade.showNotification("Вы не являетесь ведущим!");
+            facade.showNotification(idToShortUser(chat.getLeaderId(), facade) + " сейчас " + getLocalization(user, Verb.LEADER));
             return;
         }
 
-        User user = facade.userById(chat.getLeaderId());
         chat.setState(State.IDLE);
         chat.setWord(null);
         chat.setLeaderId(0);
@@ -138,7 +144,7 @@ public class CrokoGame {
         facade.confirmEvent();
         facade.sendMessage("%s %s место ведущего.".formatted(
                 idToFormattedUser(facade.getFrom(), facade),
-                getVerb(user, Verb.YIELDED)
+                getLocalization(user, Verb.YIELDED)
         ), beginKeyboard);
     }
 
@@ -159,7 +165,7 @@ public class CrokoGame {
                 facade.sendSticker(YES_STICKER_ID);
                 facade.sendMessage("%s %s: %s.".formatted(
                         userToFormattedUser(user),
-                        getVerb(user, Verb.WAS_CORRECT),
+                        getLocalization(user, Verb.WAS_CORRECT),
                         chat.getWord()
                 ), nextKeyboard);
                 chat.setWord(null);
@@ -167,7 +173,7 @@ public class CrokoGame {
         }
     }
 
-    private String getVerb(User user, Verb verb) {
+    private String getLocalization(User user, Verb verb) {
         if (verb == Verb.WAS_CORRECT) {
             return switch (user.getSex()) {
                 case MALE -> "угадал";
@@ -237,10 +243,15 @@ public class CrokoGame {
 
         if (chat.getState() == State.IDLE) {
             facade.sendMessage("Ведущий ещё не назначен", beginKeyboard);
-        } else if (chat.getState() == State.STARTING) {
-            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.", beginKeyboard);
-        } else if (chat.getState() == State.IN_GAME) {
-            facade.sendMessage(idToFormattedUser(chat.getLeaderId(), facade) + " сейчас ведущий.", leaderKeyboard);
+        } else {
+            String leaderName = idToFormattedUser(chat.getLeaderId(), facade);
+            String leaderLocalized = getLocalization(facade.userById(chat.getLeaderId()), Verb.LEADER);
+
+            if (chat.getState() == State.STARTING) {
+                facade.sendMessage("%s - %s, слово ещё не выбрано.".formatted(leaderName, leaderLocalized), beginKeyboard);
+            } else if (chat.getState() == State.IN_GAME) {
+                facade.sendMessage("%s сейчас %s".formatted(leaderName, leaderLocalized), leaderKeyboard);
+            }
         }
     }
 
@@ -249,14 +260,18 @@ public class CrokoGame {
 
         if (chat.getState() == State.IDLE) {
             facade.showNotification("Ведущий ещё не назначен");
-        } else if (chat.getState() == State.STARTING) {
-            facade.showNotification(idToFormattedUser(chat.getLeaderId(), facade) + " - ведущий, слово ещё не выбрано.");
-        } else if (chat.getState() == State.IN_GAME) {
-            if (facade.getFrom() == chat.getLeaderId()) {
-                facade.showNotification("Загаданное слово: " + chat.getWord());
-            } else {
-                String name = facade.userById(chat.getLeaderId()).getFirstName();
-                facade.showNotification(name + " сейчас ведущий");
+        } else {
+            String leaderName = idToShortUser(chat.getLeaderId(), facade);
+            String leaderLocalized = getLocalization(facade.userById(chat.getLeaderId()), Verb.LEADER);
+
+            if (chat.getState() == State.STARTING) {
+                facade.showNotification("%s - %s, слово ещё не выбрано.".formatted(leaderName, leaderLocalized));
+            } else if (chat.getState() == State.IN_GAME) {
+                if (facade.getFrom() == chat.getLeaderId()) {
+                    facade.showNotification("Загаданное слово: " + chat.getWord());
+                } else {
+                    facade.showNotification("%s сейчас %s".formatted(leaderName, leaderLocalized));
+                }
             }
         }
     }

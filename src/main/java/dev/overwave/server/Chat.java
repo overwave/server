@@ -50,9 +50,9 @@ public class Chat {
 
     private void saveState() {
         StringBuilder builder = new StringBuilder();
-        builder.append(leaderId).append("\n");
-        builder.append(word == null ? "" : word).append("\n");
-        builder.append(state).append("\n");
+        builder.append(leaderId).append("\r\n");
+        builder.append(word == null ? "" : word).append("\r\n");
+        builder.append(state).append("\r\n");
         builder.append(recentWords);
 
         try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(PATH + id + ".txt"))) {

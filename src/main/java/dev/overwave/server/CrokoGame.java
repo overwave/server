@@ -18,6 +18,8 @@ import static dev.overwave.server.ChatBot.SKIP_ACTION;
 
 public class CrokoGame {
 
+    private static final int YES_STICKER_ID = 19446;
+
     private final WordsBank wordsBank;
     private final Map<Integer, Chat> chats;
 
@@ -154,9 +156,10 @@ public class CrokoGame {
 
                 User user = facade.userById(chat.getLeaderId());
 
+                facade.sendSticker(YES_STICKER_ID);
                 facade.sendMessage("%s %s: %s.".formatted(
                         userToFormattedUser(user),
-                        getVerb(user, Verb.DECIDED),
+                        getVerb(user, Verb.WAS_CORRECT),
                         chat.getWord()
                 ), nextKeyboard);
                 chat.setWord(null);
@@ -165,7 +168,7 @@ public class CrokoGame {
     }
 
     private String getVerb(User user, Verb verb) {
-        if (verb == Verb.DECIDED) {
+        if (verb == Verb.WAS_CORRECT) {
             return switch (user.getSex()) {
                 case MALE -> "угадал";
                 case FEMALE -> "угадала";
@@ -260,8 +263,11 @@ public class CrokoGame {
         }
     }
 
+    public void test(MessagingFacade facade) {
+    }
+
     private enum Verb {
-        DECIDED,
+        WAS_CORRECT,
         YIELDED,
         LEADER,
     }

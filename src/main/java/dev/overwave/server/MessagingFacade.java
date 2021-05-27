@@ -74,6 +74,18 @@ public class MessagingFacade {
         }
     }
 
+    public void sendSticker( int stickerId) {
+        try {
+            new MessagesSend(accessToken)
+                    .setPeerId(getPeerId())
+                    .setDisableMentions(true)
+                    .setStickerId(stickerId)
+                    .execute();
+        } catch (BotsLongPollAPIException | BotsLongPollException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendMessage(String message, Keyboard keyboard) {
         try {
             new MessagesSend(accessToken)

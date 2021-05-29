@@ -103,6 +103,6 @@ public class Chat {
     }
 
     public boolean wasRecently(String word) {
-        return !recentWords.contains(word);
+        return recentWords.contains(word);
     }
 }

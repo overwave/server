@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 
 public class Chat {
     private static final String PATH = "state/state-";
@@ -19,6 +20,7 @@ public class Chat {
     private int leaderId;
     private CrokoGame.State state;
     private String word;
+    private String lastWord;
 
     public Chat(int id) {
         this.id = id;
@@ -32,9 +34,10 @@ public class Chat {
 
             this.leaderId = Integer.parseInt(lines[0]);
             this.word = lines[1].equals("") ? null : lines[1];
-            this.state = CrokoGame.State.valueOf(lines[2]);
+            this.word = lines[2].equals("") ? null : lines[2];
+            this.state = CrokoGame.State.valueOf(lines[3]);
 
-            for (int i = 3; i < lines.length; i++) {
+            for (int i = 4; i < lines.length; i++) {
                 recentWords.add(lines[i]);
             }
             return;
@@ -45,6 +48,7 @@ public class Chat {
 
         this.leaderId = 0;
         this.word = null;
+        this.lastWord = null;
         this.state = CrokoGame.State.IDLE;
     }
 
@@ -52,6 +56,7 @@ public class Chat {
         StringBuilder builder = new StringBuilder();
         builder.append(leaderId).append("\r\n");
         builder.append(word == null ? "" : word).append("\r\n");
+        builder.append(lastWord == null ? "" : lastWord).append("\r\n");
         builder.append(state).append("\r\n");
         builder.append(recentWords);
 
@@ -80,6 +85,11 @@ public class Chat {
     }
 
     public void setWord(String word) {
+        if (Objects.equals(this.lastWord, this.word)) {
+            this.lastWord = null;
+        } else {
+            this.lastWord = this.word;
+        }
         this.word = word;
         saveState();
     }
@@ -104,5 +114,9 @@ public class Chat {
 
     public boolean wasRecently(String word) {
         return recentWords.contains(word);
+    }
+
+    public String getLastWord() {
+        return lastWord;
     }
 }

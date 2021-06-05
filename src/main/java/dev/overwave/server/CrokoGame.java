@@ -11,10 +11,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static dev.overwave.server.ChatBot.BEGIN_ACTION;
-import static dev.overwave.server.ChatBot.NEXT_ACTION;
-import static dev.overwave.server.ChatBot.PEEK_ACTION;
-import static dev.overwave.server.ChatBot.SKIP_ACTION;
+import static dev.overwave.server.ChatBot.*;
 
 public class CrokoGame {
 
@@ -38,10 +35,12 @@ public class CrokoGame {
 
         Button.Action getWordAction = new Button.CallbackAction("Получить слово").setPayload(NEXT_ACTION);
         Button getWordButton = new Button(Button.ButtonColor.SECONDARY, getWordAction);
+        Button.Action getPreviousWordAction = new Button.CallbackAction("↩").setPayload(PREVIOUS_ACTION);
+        Button getPreviousWordButton = new Button(Button.ButtonColor.SECONDARY, getPreviousWordAction);
         Button.Action skipAction = new Button.CallbackAction("Пропустить ход").setPayload(SKIP_ACTION);
         Button skipButton = new Button(Button.ButtonColor.SECONDARY, skipAction);
         nextKeyboard = new Keyboard()
-                .setButtons(List.of(List.of(getWordButton), List.of(skipButton)))
+                .setButtons(List.of(List.of(getWordButton, getPreviousWordButton), List.of(skipButton)))
                 .setInline(true);
 
         Button.Action getNewWordAction = new Button.CallbackAction("Получить новое слово").setPayload(NEXT_ACTION);
@@ -121,6 +120,24 @@ public class CrokoGame {
             facade.showNotification("Объясни слово: " + chat.getWord());
         } else {
             facade.showNotification("Ведущий ещё не выбран!");
+        }
+    }
+
+    public void getPreviousWord(MessagingFacade facade) {
+        Chat chat = getChat(facade.getPeerId());
+
+        if (facade.getFrom() != chat.getLeaderId()) {
+            User user = facade.userById(chat.getLeaderId());
+            facade.showNotification(idToShortUser(chat.getLeaderId(), facade) + " сейчас " + getLocalization(user, Verb.LEADER));
+            return;
+        }
+
+        if (chat.getState() == State.IN_GAME && chat.getLastWord() != null) {
+            chat.setWord(chat.getLastWord());
+
+            facade.showNotification("Объясни слово: " + chat.getWord());
+        } else {
+            facade.showNotification("Предыдущего слова нет");
         }
     }
 

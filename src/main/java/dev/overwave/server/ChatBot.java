@@ -40,6 +40,7 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
 
     public static final String BEGIN_ACTION = "{\"action\":\"begin\"}";
     public static final String NEXT_ACTION = "{\"action\":\"next\"}";
+    public static final String PREVIOUS_ACTION = "{\"action\":\"previous\"}";
     public static final String SKIP_ACTION = "{\"action\":\"skip\"}";
     public static final String PEEK_ACTION = "{\"action\":\"peek\"}";
 
@@ -89,6 +90,8 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
             crokoGame.becomeLeader(facadeFactory.of(messageEvent));
         } else if ("next".equals(action)) {
             crokoGame.getWord(facadeFactory.of(messageEvent));
+        } else if ("previous".equals(action)) {
+            crokoGame.getPreviousWord(facadeFactory.of(messageEvent));
         } else if ("skip".equals(action)) {
             crokoGame.skipTurn(facadeFactory.of(messageEvent));
         } else if ("peek".equals(action)) {

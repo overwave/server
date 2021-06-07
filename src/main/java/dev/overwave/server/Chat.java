@@ -34,7 +34,7 @@ public class Chat {
 
             this.leaderId = Integer.parseInt(lines[0]);
             this.word = lines[1].equals("") ? null : lines[1];
-            this.word = lines[2].equals("") ? null : lines[2];
+            this.lastWord = lines[2].equals("") ? null : lines[2];
             this.state = CrokoGame.State.valueOf(lines[3]);
 
             for (int i = 4; i < lines.length; i++) {

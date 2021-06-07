@@ -127,7 +127,57 @@ public class ChatBot extends LongPollBot implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        new BotsLongPoll(this).run();
+    public void run(ApplicationArguments args) {
+        while (true) {
+            try {
+                new BotsLongPoll(this).run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+    //java.lang.IllegalStateException: Failed to execute ApplicationRunner
+    //	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:789) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:776) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	at org.springframework.boot.SpringApplication.run(SpringApplication.java:344) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1336) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1325) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	at dev.overwave.server.ServerApplication.main(ServerApplication.java:10) ~[classes/:na]
+    //Caused by: java.lang.NullPointerException: Cannot invoke "api.longpoll.bots.model.objects.media.AttachmentType.ordinal()" because "attachmentType" is null
+    //	at api.longpoll.bots.adapters.deserializers.AttachmentDeserializer.getType(AttachmentDeserializer.java:50) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.adapters.deserializers.AttachmentDeserializer.deserialize(AttachmentDeserializer.java:43) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.adapters.deserializers.AttachmentDeserializer.deserialize(AttachmentDeserializer.java:28) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:69) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.TypeAdapter$1.read(TypeAdapter.java:199) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:41) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter.read(CollectionTypeAdapterFactory.java:82) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter.read(CollectionTypeAdapterFactory.java:61) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$1.read(ReflectiveTypeAdapterFactory.java:131) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$Adapter.read(ReflectiveTypeAdapterFactory.java:222) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$1.read(ReflectiveTypeAdapterFactory.java:131) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$Adapter.read(ReflectiveTypeAdapterFactory.java:222) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.Gson.fromJson(Gson.java:932) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.Gson.fromJson(Gson.java:1003) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.TreeTypeAdapter$GsonContextImpl.deserialize(TreeTypeAdapter.java:162) ~[gson-2.8.6.jar:na]
+    //	at api.longpoll.bots.adapters.deserializers.EventDeserializer.deserialize(EventDeserializer.java:58) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.adapters.deserializers.EventDeserializer.deserialize(EventDeserializer.java:46) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at com.google.gson.internal.bind.TreeTypeAdapter.read(TreeTypeAdapter.java:69) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.TypeAdapter$1.read(TypeAdapter.java:199) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.TypeAdapterRuntimeTypeWrapper.read(TypeAdapterRuntimeTypeWrapper.java:41) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter.read(CollectionTypeAdapterFactory.java:82) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.CollectionTypeAdapterFactory$Adapter.read(CollectionTypeAdapterFactory.java:61) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$1.read(ReflectiveTypeAdapterFactory.java:131) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.internal.bind.ReflectiveTypeAdapterFactory$Adapter.read(ReflectiveTypeAdapterFactory.java:222) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.Gson.fromJson(Gson.java:932) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.Gson.fromJson(Gson.java:1003) ~[gson-2.8.6.jar:na]
+    //	at com.google.gson.Gson.fromJson(Gson.java:975) ~[gson-2.8.6.jar:na]
+    //	at api.longpoll.bots.methods.VkApiMethod.execute(VkApiMethod.java:79) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.methods.VkApiMethod.execute(VkApiMethod.java:61) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.server.LongPollClient.getUpdates(LongPollClient.java:36) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.server.InitializedLongPollClient.getUpdates(InitializedLongPollClient.java:23) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at api.longpoll.bots.BotsLongPoll.run(BotsLongPoll.java:26) ~[java-vk-bots-longpoll-api-1.5.2.jar:na]
+    //	at dev.overwave.server.ChatBot.run(ChatBot.java:131) ~[classes/:na]
+    //	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:786) ~[spring-boot-2.5.1-20210524.103327-4.jar:2.5.1-SNAPSHOT]
+    //	... 5 common frames omitted
 }

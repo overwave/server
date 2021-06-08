@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 
 public class Chat {
     private static final String PATH = "state/state-";
@@ -85,11 +84,7 @@ public class Chat {
     }
 
     public void setWord(String word) {
-        if (Objects.equals(this.lastWord, this.word)) {
-            this.lastWord = null;
-        } else {
-            this.lastWord = this.word;
-        }
+        this.lastWord = this.word;
         this.word = word;
         saveState();
     }

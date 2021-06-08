@@ -27,25 +27,35 @@ public class CrokoGame {
     public CrokoGame() {
         this.wordsBank = new WordsBank();
 
-        Button.Action beginAction = new Button.CallbackAction("Стать ведущим").setPayload(BEGIN_ACTION);
+        Button.Action beginAction = new Button.CallbackAction("Стать ведущим")
+                .setPayload(BEGIN_ACTION_PAYLOAD.getAsObject());
         Button beginButton = new Button(Button.ButtonColor.SECONDARY, beginAction);
         beginKeyboard = new Keyboard()
                 .setButtons(List.of(List.of(beginButton)))
                 .setInline(true);
 
-        Button.Action getWordAction = new Button.CallbackAction("Получить слово").setPayload(NEXT_ACTION);
+        Button.Action getWordAction = new Button.CallbackAction("Получить слово")
+                .setPayload(NEXT_ACTION_PAYLOAD.getAsObject());
         Button getWordButton = new Button(Button.ButtonColor.SECONDARY, getWordAction);
-        Button.Action getPreviousWordAction = new Button.CallbackAction("↩").setPayload(PREVIOUS_ACTION);
+
+        Button.Action getPreviousWordAction = new Button.CallbackAction("↩")
+                .setPayload(PREVIOUS_ACTION_PAYLOAD.getAsObject());
         Button getPreviousWordButton = new Button(Button.ButtonColor.SECONDARY, getPreviousWordAction);
-        Button.Action skipAction = new Button.CallbackAction("Пропустить ход").setPayload(SKIP_ACTION);
+
+        Button.Action skipAction = new Button.CallbackAction("Пропустить ход")
+                .setPayload(SKIP_ACTION_PAYLOAD.getAsObject());
         Button skipButton = new Button(Button.ButtonColor.SECONDARY, skipAction);
+
         nextKeyboard = new Keyboard()
                 .setButtons(List.of(List.of(getWordButton, getPreviousWordButton), List.of(skipButton)))
                 .setInline(true);
 
-        Button.Action getNewWordAction = new Button.CallbackAction("Получить новое слово").setPayload(NEXT_ACTION);
+        Button.Action getNewWordAction = new Button.CallbackAction("Получить новое слово")
+                .setPayload(NEXT_ACTION_PAYLOAD.getAsObject());
         Button getNewWordButton = new Button(Button.ButtonColor.SECONDARY, getNewWordAction);
-        Button.Action peekWordAction = new Button.CallbackAction("Показать слово").setPayload(PEEK_ACTION);
+
+        Button.Action peekWordAction = new Button.CallbackAction("Показать слово")
+                .setPayload(PEEK_ACTION_PAYLOAD.getAsObject());
         Button peekWordButton = new Button(Button.ButtonColor.SECONDARY, peekWordAction);
 
         leaderKeyboard = new Keyboard()
@@ -54,8 +64,6 @@ public class CrokoGame {
 
         chats = new HashMap<>();
     }
-
-//    "failed":2 — истекло время действия ключа, нужно заново получить key методом groups.getLongPollServer.
 
     private String idToShortUser(int id, MessagingFacade facade) {
         return facade.userById(id).getFirstName();

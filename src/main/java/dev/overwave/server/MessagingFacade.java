@@ -47,8 +47,8 @@ public class MessagingFacade {
                     .setUserId(messageEvent.getUserId())
                     .setEventData(new Button.ShowSnackbar(text))
                     .execute();
-        } catch (BotsLongPollAPIException | BotsLongPollException e) {
-            throw new RuntimeException(e);
+        } catch (BotsLongPollException e) {
+            e.printStackTrace();
         }
     }
 
@@ -69,7 +69,7 @@ public class MessagingFacade {
                     .setMessage(message)
                     .setDisableMentions(true)
                     .execute();
-        } catch (BotsLongPollAPIException | BotsLongPollException e) {
+        } catch (BotsLongPollException e) {
             e.printStackTrace();
         }
     }
@@ -81,7 +81,7 @@ public class MessagingFacade {
                     .setDisableMentions(true)
                     .setStickerId(stickerId)
                     .execute();
-        } catch (BotsLongPollAPIException | BotsLongPollException e) {
+        } catch (BotsLongPollException e) {
             e.printStackTrace();
         }
     }
@@ -94,7 +94,7 @@ public class MessagingFacade {
                     .setMessage(message)
                     .setDisableMentions(true)
                     .execute();
-        } catch (BotsLongPollAPIException | BotsLongPollException e) {
+        } catch (BotsLongPollException e) {
             e.printStackTrace();
         }
     }
@@ -109,7 +109,7 @@ public class MessagingFacade {
                     .setPeerId(messageEvent.getPeerId())
                     .setUserId(messageEvent.getUserId())
                     .execute();
-        } catch (BotsLongPollAPIException | BotsLongPollException e) {
+        } catch (BotsLongPollException e) {
             e.printStackTrace();
         }
     }
